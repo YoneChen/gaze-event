@@ -3,5 +3,16 @@
   "description": "Gaze event for WebVR project",
   "version": "1.0.0",
   "main": "index.js",
+  "keywords": [
+    "webvr",
+    "gaze",
+    "three",
+    "event",
+    "listener"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yonechen/gaze-event.git"
+  },
   "license": "MIT"
 }
