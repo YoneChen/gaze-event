@@ -14,5 +14,10 @@
     "type": "git",
     "url": "git+https://github.com/yonechen/gaze-event.git"
   },
+  "author": "Yone Chen",
+  "bugs": {
+    "url": "https://github.com/yonechen/gaze-event/issues"
+  },
+  "homepage": "https://github.com/yonechen/gaze-event#readme",
   "license": "MIT"
 }
