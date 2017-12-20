@@ -17,6 +17,7 @@ It observe basic gaze actions for mesh targets in your three.js project,such as 
 First,Make sure you have included the three.js for your project.
 
 1. `yarn add gaze-event` or `npm install --save gaze-event`
+
 1. `import GazeEvent from 'gaze-event'` or `const gazeEvent = require('gaze-event)` in project with module bundler.
 
 Of course,You can also use `<script src="gaze-event/index.js"></script>` without module bundler.
