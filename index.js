@@ -2,15 +2,15 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD
-        define(['three'], factory)
+        define([], factory)
     } else if (typeof exports === 'object') {
         // Node, CommonJS-like
-        module.exports = factory(require('three'))
+        module.exports = factory()
     } else {
         // Browser globals (root is window)
-        root.GazeEvent = factory(root.THREE)
+        root.GazeEvent = factory()
     }
-}(this, function (THREE) {
+}(this, function () {
     if (!THREE) {
         console.error('THREE is undefined,make sure you have included three.js library first.');
         return
@@ -20,7 +20,7 @@
         this.raycaster = new THREE.Raycaster();
         this._center = new THREE.Vector2();
         this.rayList = {}, this.targetList = [];
-        this._lastTarget = null;
+        this._lastTarget = null; this.delayTime = 1500;
     }
     /** 
      * @param {Object} target should be an instance of THREE.Mesh
@@ -36,7 +36,8 @@
             target: target,
             gazeEnter: noop,
             gazeTrigger: noop,
-            gazeLeave: noop
+            gazeLeave: noop,
+            gazeWait: noop
         };
         this.rayList[target.id][actionType] = callback;
         var _this = this;
@@ -64,7 +65,7 @@
         }
     }
     /** Remove all the target listeners. */
-    GazeEvent.prototype.clear = function() {
+    GazeEvent.prototype.removeAll = function() {
         this.rayList = {}, this.targetList = [];
     }
     /** observe the targets during each animation frame */
@@ -77,16 +78,19 @@
             var currentTarget = intersects[0].object;
             if (this._lastTarget) { // target intersected during previous frame.
                 if (this._lastTarget.id !== currentTarget.id) { 
-                    // gazeLeave action triggered on previous intersected target
+                    // emit gazeLeave action on previous intersected target
                     this.rayList[this._lastTarget.id].gazeLeave(this._lastTarget);
-                    // gazeEnter action triggered on current intersected target
+                    // emit gazeEnter action on current intersected target
+                    this._gazeEnterTime = Date.now();
                     this.rayList[currentTarget.id].gazeEnter(currentTarget);
                 }
-            } else { // gazeLeave action triggered on previous intersected target
+            } else { // emit gazeEnter action on current intersected target
+                this._gazeEnterTime = Date.now();
                 this.rayList[currentTarget.id].gazeEnter(currentTarget);
             }
             // gazeTrigger action triggered on current intersected target
             this.rayList[currentTarget.id].gazeTrigger(currentTarget);
+            this._delayListener(currentTarget.id);
             this._lastTarget = currentTarget;
         } else { // nothing intersected by raycaster
             // gazeLeave action triggered on previous intersected target
@@ -94,6 +98,14 @@
             this._lastTarget = null;
         }
     }
+    GazeEvent.prototype._delayListener = function(targetid) {
+        var _gazeEnterTime = this._gazeEnterTime,delayTime = this.delayTime,rayList = this.rayList;
+        if (_gazeEnterTime && Date.now() - _gazeEnterTime > delayTime) {
+            rayList[targetid].gazeWait();
+            this._gazeEnterTime = null;
+        }
+
+    }
     //    exposed public method
-    return GazeEvent
+    export default GazeEvent
 }));
