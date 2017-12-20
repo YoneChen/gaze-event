@@ -108,5 +108,5 @@
 
     }
     //    exposed public method
-    export default GazeEvent
+    return GazeEvent
 }));
