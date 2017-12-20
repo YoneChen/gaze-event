@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
+	<title>WebVR-gaze-event</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
+		html,
+		body {
+			height: 100%;
+		}
+
+		body {
+			font-size: 14px;
+			font-family: "Arial", "Microsoft YaHei", "黑体", sans-serif;
+			overflow: hidden;
+		}
+
+		.main-page {
+			position: relative;
+			height: 100%;
+		}
+
+		.vr-btn {
+			position: absolute;
+			right: 18px;
+			bottom: 18px;
+			padding: 8px 12px;
+			background-color: #00aadd;
+			text-align: center;
+			color: #fff;
+			font-size: 14px;
+			cursor: pointer;
+		}
+	</style>
+</head>
+
+<body>
+	<section class="main-page">
+		<div class="vr-btn">ENTER VR</div>
+	</section>
+</body>
+<script src="lib/three.min.js"></script>
+<script src="lib/webvr-polyfill.min.js"></script>
+<script src="../index.js"></script>
+<script>
+	/**
+** author:YoneChen
+** date:2017-08-18
+**/
+	function WebVRApp() {
+		// create scene,camera and renderer
+		this.scene = new THREE.Scene();
+		this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+		this.scene.add(this.camera);
+
+		// init renderer
+		this.renderer = new THREE.WebGLRenderer({ antialias: true });
+		this.renderer.setSize(window.innerWidth, window.innerHeight);
+		this.renderer.setClearColor(0x519EcB);
+		this.renderer.shadowMapEnabled = true;
+		this.renderer.setPixelRatio(window.devicePixelRatio);
+		document.querySelector('.main-page').appendChild(this.renderer.domElement);
+
+		this.initVR();
+		// 往场景添加3d物体
+		this.start();
+		// 窗口大小调整监听
+		window.addEventListener('resize', this.resize.bind(this), false);
+		// launch the animation loop
+		this.renderer.animate(this.update.bind(this));
+	}
+	WebVRApp.prototype.start = function () {
+		var scene = this.scene, camera = this.camera;
+		// add crosshair
+		this.addCrosshair();
+		// add light
+		scene.add(new THREE.AmbientLight(0xFFFFFF));
+		this.addLight();
+		// add ground
+		this.addGround(1000, 1000);
+		// init gazeEvent
+		var gazeEvent = new GazeEvent();
+		this.gazeEvent = gazeEvent;
+		// add cubes
+		for (var i = 0; i < 100; i++) {
+			// create a cube
+			var geometry = new THREE.CubeGeometry(2, 2, 2);
+			var material = new THREE.MeshLambertMaterial({
+				color: 0xef6500,
+				needsUpdate: true,
+				opacity: 1,
+				transparent: true
+			});
+			var cube = new THREE.Mesh(geometry, material);
+			cube.castShadow = true;
+			cube.position.set(
+				100 * Math.random() - 50,
+				50 * Math.random() - 10,
+				100 * Math.random() - 50
+			);
+			scene.add(cube);
+			// add eventlistener for each cube
+			gazeEvent.on(cube, 'gazeEnter', function (target) {
+				// gazeEnter emit
+				target.material.opacity = 0.5;
+			});
+			gazeEvent.on(cube, 'gazeTrigger', function (target) {
+				// gazeTrigger emit in each animation frame
+				target.rotation.y += 0.02;
+			});
+			gazeEvent.on(cube, 'gazeLeave', function (target) {
+				// gazeLeave emit
+				target.material.opacity = 1;
+			});
+
+		}
+
+	}
+	WebVRApp.prototype.initVR = function () {
+		var renderer = this.renderer;
+		renderer.vr.enabled = true;
+		navigator.getVRDisplays().then(function(display) {
+			if (!display) alert('no vr display,try on mobile');
+			renderer.vr.setDevice(display[0]);
+			// set vr button
+			var button = document.querySelector('.vr-btn');
+			VRButton.init(display[0], renderer, button, function() {
+				button.textContent = 'EXIT VR';
+			}, function () {
+				button.textContent = 'ENTER VR';
+			});
+		}).catch(function (err) {
+			console.warn(err)
+		});
+	}
+	WebVRApp.prototype.resize = function () {
+		var camera = this.camera, renderer = this.renderer;
+		// window resize
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+		renderer.setSize(window.innerWidth, window.innerHeight);
+	}
+	WebVRApp.prototype.addCrosshair = function () {
+		// create crosshair
+		var camera = this.camera;
+		var geometry = new THREE.CircleBufferGeometry(0.002, 16);
+		var material = new THREE.MeshBasicMaterial({
+			color: 0xffffff,
+			opacity: 0.5,
+			transparent: true
+		});
+		var crosshair = new THREE.Mesh(geometry, material);
+		crosshair.position.z = -0.5;
+		camera.add(crosshair);
+	}
+	WebVRApp.prototype.addLight = function () {
+		var scene = this.scene
+		// 创建光线
+		var light = new THREE.DirectionalLight(0xcccccc, 1);
+		light.position.set(30, 30, -30);
+		light.castShadow = true;
+		// light.shadow.camera.far = 5000;      // default
+		light.shadow.mapSize.width = 4096;
+		light.shadow.mapSize.height = 4096;
+		light.shadow.camera.left = -350;
+		light.shadow.camera.right = 350;
+		light.shadow.camera.top = 350;
+		light.shadow.camera.bottom = -350;
+		scene.add(light);
+
+	}
+	WebVRApp.prototype.addGround = function (width, height) {
+		// create ground
+		var scene = this.scene;
+		var geometry = new THREE.PlaneBufferGeometry(width, height);
+		var material = new THREE.MeshLambertMaterial({ color: 0x888888 });
+		var ground = new THREE.Mesh(geometry, material);
+		ground.rotation.x = - Math.PI / 2;
+		ground.position.y = -10;
+		ground.receiveShadow = true;
+		scene.add(ground);
+	}
+	WebVRApp.prototype.update = function () {
+		var scene = this.scene, camera = this.camera, renderer = this.renderer, gazeEvent = this.gazeEvent;
+		// update gazeEvent
+		gazeEvent.update(camera);
+		renderer.render(scene, camera);
+	}
+	// VRbutton logic control
+	var VRButton = {
+		init: function (display, renderer, button, enterVR, exitVR) {
+			if (display && display.displayName != "Mouse and Keyboard VRDisplay (webvr-polyfill)") {
+
+				button.addEventListener('click', function (e) {
+					display.isPresenting ? display.exitPresent() : display.requestPresent([{ source: renderer.domElement }]);
+				});
+
+				window.addEventListener('vrdisplaypresentchange', function (e) {
+					display.isPresenting ? enterVR() : exitVR();
+				}, false);
+			} else {
+				button.remove();
+			}
+		}
+
+	}
+	new WebVRApp();
+</script>
+
+</html>

@@ -1,15 +1,29 @@
 # gaze-event
-gaze event for webvr threejs project
 
-### Installation
+Gaze event listeners for webvr threejs project.
+
+It observe basic gaze actions for mesh targets in your three.js project,such as `gazeEnter`,`gazeLeave` and `gazeTrigger`.
+
+- gazeEnter: When the target is being gazed,'gazeEnter' action will be triggered in first animation frame;
+
+- gazeLeave: When the target isn't being gazed,'gazeEnter' action will be triggered in last animation frame.
+
+- gazeTrigger: When the target is being gazed,'gazeEnter' action will be triggered in every animation frame;
+
+[See the example.](https://yonechen.github.io/gaze-event/example)
+
+## Installation
+
+First,Make sure you have included the three.js for your project.
+
 1. `yarn add gaze-event` or `npm install --save gaze-event`
-2. `import GazeEvent from 'gaze-event'` or `const gazeEvent = require('gaze-event)` in project with module bundler.
+1. `import GazeEvent from 'gaze-event'` or `const gazeEvent = require('gaze-event)` in project with module bundler.
 
 Of course,You can also use `<script src="gaze-event/index.js"></script>` without module bundler.
 
-### How to use
+## How to use
 
-```
+```javascript
 // init scene, camera, renderer
 ...
 // create crosshair here
@@ -22,13 +36,18 @@ scene.add(cube);
 var gazeEvent = new GazeEvent();
 
 // Step2: add event listener for the cube
-gazeEvent.watch(cube, function() => {
-    cube.material.opacity = 0.5; // gazeEnter the cube
-}, function() {
-    cube.material.opacity = 1; // gazeExit the cube
+gazeEvent.on(cube, 'gazeEnter', function(target) {
+    target.material.opacity = 0.5; // emit in first frame when the cube is gazed
+});
+gazeEvent.on(cube, 'gazeLeave', function(target) {
+    target.material.opacity = 1; // emit in last frame when the cube isn't gazed
+});
+gazeEvent.on(cube, 'gazeTrigger', function(target) {
+    target.rotation.y += 0.02; // emite in each frame when the cube is gazed
 });
 
-function animate() { // animate function for requestAnimationFrame
+// Step3: update gazeEvent to observe the cube in each animation frame
+function animateLoop() { // animate loop for requestAnimationFrame
     ...
     // update gazeEvent
     gazeEvent.update(camera);
@@ -36,20 +55,45 @@ function animate() { // animate function for requestAnimationFrame
 }
 ```
 
-### Orthers
-1. remove gaze listener for a mesh
+## API
+
+### constructor
+
+create a GazeEvent instance.
+
+```javascript
+var gazeEvent = new GazeEvent();
 ```
-gazeEvent.off(mesh);
+
+### on(target,actionType,callback)
+
+add a gaze action listener for a mesh target, `actionType` can be `'gazeEnter'||'gazeLeave'||'gazeTrigger'`
+
+```javascript
+gazeEvent.on(target,'gazeEnter')
 ```
-2. remove all gaze listeners
+
+### off(target,actionType)
+
+remove a gaze action listener for a mesh target.
+
+```javascript
+gazeEvent.off(mesh,'gazeEnter');
 ```
+
+### clear()
+
+remove all gaze listeners.
+
+```javascript
 gazeEvent.clear();
 ```
-## Need Help?
+
+## Need Help
 
 Ask questions [here](https://github.com/yonechen/gaze-event/issues).
 
-## Any advise?
+## Any Advise
 
 PR welcome [here](https://github.com/yonechen/gaze-event/pulls).
 
