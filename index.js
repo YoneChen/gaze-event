@@ -50,7 +50,8 @@
      * @param {String} actionType  
      *      'gazeEnter': When the target is being gazed,'gazeEnter' action will be triggered in first animation frame, 
      *      'gazeTrigger': When the target is being gazed,'gazeEnter' action will be triggered in every animation frame,
-     *      'gazeLeave': When the target isn't being gazed,'gazeEnter' action will be triggered in last animation frame
+     *      'gazeLeave': When the target isn't being gazed,'gazeEnter' action will be triggered in last animation frame,
+     *      'gazeWait': action will be triggered for a long gaze in last animation frame
      **/
     GazeEvent.prototype.off = function(target, actionType) {
         if (!actionType) {
