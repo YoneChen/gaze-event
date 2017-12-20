@@ -4,11 +4,11 @@ Gaze event listeners for webvr threejs project.
 
 It observe basic gaze actions for mesh targets in your three.js project,such as `gazeEnter`,`gazeLeave` and `gazeTrigger`.
 
-- gazeEnter: When the target is being gazed,'gazeEnter' action will be triggered in first animation frame;
+- gazeEnter: Emit in first animation frame when target is gazed;
 
-- gazeLeave: When the target isn't being gazed,'gazeEnter' action will be triggered in last animation frame.
+- gazeLeave: Emit in last animation frame when target is gazed;
 
-- gazeTrigger: When the target is being gazed,'gazeEnter' action will be triggered in every animation frame;
+- gazeTrigger: Emit in each animation frame when target is gazed;
 
 [See the example.](https://yonechen.github.io/gaze-event/example)
 
