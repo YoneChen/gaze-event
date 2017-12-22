@@ -95,7 +95,9 @@
             this._lastTarget = currentTarget;
         } else { // nothing intersected by raycaster
             // gazeLeave action triggered on previous intersected target
-            if (this._lastTarget) this.rayList[this._lastTarget.id].gazeLeave(this._lastTarget);
+            if (this._lastTarget && this.rayList[this._lastTarget.id]) {
+                this.rayList[this._lastTarget.id].gazeLeave(this._lastTarget);
+            }
             this._lastTarget = null;
         }
     }
