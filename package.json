@@ -1,7 +1,7 @@
 {
   "name": "gaze-event",
   "description": "Gaze event for WebVR project",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "main": "index.js",
   "keywords": [
     "webvr",
