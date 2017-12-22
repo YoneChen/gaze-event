@@ -67,7 +67,7 @@
     }
     /** Remove all the target listeners. */
     GazeEvent.prototype.removeAll = function() {
-        this.rayList = {}, this.targetList = [];
+        this.rayList = {}, this.targetList = [],this._lastTarget = null;
     }
     /** observe the targets during each animation frame */
     GazeEvent.prototype.update = function(camera) {
