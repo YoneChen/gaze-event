@@ -80,7 +80,7 @@
             if (this._lastTarget) { // target intersected during previous frame.
                 if (this._lastTarget.id !== currentTarget.id) { 
                     // emit gazeLeave action on previous intersected target
-                    this.rayList[this._lastTarget.id].gazeLeave(this._lastTarget);
+                    this.rayList[this._lastTarget.id] && this.rayList[this._lastTarget.id].gazeLeave(this._lastTarget);
                     // emit gazeEnter action on current intersected target
                     this._gazeEnterTime = Date.now();
                     this.rayList[currentTarget.id].gazeEnter(currentTarget);
@@ -95,9 +95,7 @@
             this._lastTarget = currentTarget;
         } else { // nothing intersected by raycaster
             // gazeLeave action triggered on previous intersected target
-            if (this._lastTarget && this.rayList[this._lastTarget.id]) {
-                this.rayList[this._lastTarget.id].gazeLeave(this._lastTarget);
-            }
+            (this._lastTarget && this.rayList[this._lastTarget.id]) && this.rayList[this._lastTarget.id].gazeLeave(this._lastTarget);
             this._lastTarget = null;
         }
     }
